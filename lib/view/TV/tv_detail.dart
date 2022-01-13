@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:movinfo/core/base/base_state.dart';
 import 'package:movinfo/core/extensions/context_entensions.dart';
+import 'package:movinfo/core/init/cache/locale_manager.dart';
 import 'package:movinfo/core/init/network/network_manager.dart';
 import 'package:movinfo/core/view/tv/model/tv_detail_model.dart';
 import 'package:movinfo/core/view/tv/model/tv_model.dart';
@@ -15,7 +17,7 @@ class TVDetailView extends StatefulWidget {
   _TVDetailViewState createState() => _TVDetailViewState();
 }
 
-class _TVDetailViewState extends State<TVDetailView> {
+class _TVDetailViewState extends BaseState<TVDetailView> {
   late Results model;
   StreamController<TVDetailModel> _streamController = StreamController();
   @override
@@ -27,7 +29,9 @@ class _TVDetailViewState extends State<TVDetailView> {
 
   void fetchData() async {
     TVDetailModel items = await NetworkManager.instance.getData<TVDetailModel>(
-        '/tv/${model.id}', TVDetailModel(), {'language': 'tr-TR'});
+        '/tv/${model.id}',
+        TVDetailModel(),
+        {'language': getLangKey(LocaleManager.getString('language')!)});
     // ignore: unnecessary_null_comparison
     if (items == null) return;
     _streamController.add(items);

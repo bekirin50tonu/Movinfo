@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:movinfo/core/constants/navigation_constants.dart';
-import 'package:movinfo/view/Movie/movie_detail.dart';
-import 'package:movinfo/view/Movie/movie_list.dart';
+import 'package:movinfo/view/Movie/movie_detail_sliver.dart';
 import 'package:movinfo/view/Movie/movie_search.dart';
 import 'package:movinfo/view/NotFound/page_not_found_view.dart';
+import 'package:movinfo/view/Settings/settings.dart';
 import 'package:movinfo/view/TV/tv_detail.dart';
 import 'package:movinfo/view/TV/tv_search.dart';
 
@@ -25,6 +25,8 @@ class NavigationRoute {
         return MaterialPageRoute(builder: (context) => MovieSearchView());
       case NavigationConstants.TV_SEARCH:
         return MaterialPageRoute(builder: (context) => TVSearchView());
+      case NavigationConstants.SETTINGS:
+        return MaterialPageRoute(builder: (context) => SettingsView());
       default:
         return MaterialPageRoute(
           builder: (context) => PageNotFoundView(),

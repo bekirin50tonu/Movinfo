@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:movinfo/core/base/base_state.dart';
 import 'package:movinfo/core/constants/app_constants.dart';
 import 'package:movinfo/core/constants/navigation_constants.dart';
 import 'package:movinfo/core/extensions/context_entensions.dart';
+import 'package:movinfo/core/init/cache/locale_manager.dart';
 import 'package:movinfo/core/init/navigation/navigate_service.dart';
 import 'package:movinfo/core/init/network/network_manager.dart';
 import 'package:movinfo/core/view/movie/model/movie_model.dart';
@@ -18,7 +20,7 @@ class MovieList extends StatefulWidget {
   _MovieListState createState() => _MovieListState();
 }
 
-class _MovieListState extends State<MovieList> {
+class _MovieListState extends BaseState<MovieList> {
   // ignore: close_sinks
   StreamController<List<MovieModel>> movieController = StreamController();
   List<MovieModel> _items = [];
@@ -86,10 +88,13 @@ class _MovieListState extends State<MovieList> {
   }
 
   void fetchData() async {
-    MovieModel items = await NetworkManager.instance.getData<MovieModel>(
-        widget.path,
-        MovieModel(),
-        {'language': 'tr-TR', 'page': this.currentPage, 'region': ',TR'});
+    print("DİL İŞTE BU : " + getLangKey(LocaleManager.getString('language')!)!);
+    MovieModel items = await NetworkManager.instance
+        .getData<MovieModel>(widget.path, MovieModel(), {
+      'language': getLangKey(LocaleManager.getString('language')!),
+      'page': this.currentPage,
+      'region': getCountryKey(LocaleManager.getString('country')!)
+    });
     if (items == null || items.results == null) return;
     _itemCount += items.results!.length;
     _items.add(items);
@@ -183,56 +188,35 @@ class _MovieListState extends State<MovieList> {
         child: SizedBox(
           height: context.dynamicHeight(0.7),
           child: Card(
-              color: context.media.platformBrightness == Brightness.dark
-                  ? Colors.black87
-                  : Colors.grey.shade300,
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Flexible(
-                      child: CachedNetworkImage(
-                        imageUrl: posterPath,
-                        placeholder: (context, url) =>
-                            new CircularProgressIndicator(),
-                        errorWidget: (context, url, error) =>
-                            new Icon(Icons.error),
-                      ),
-                    ),
-                    Container(
-                      child: ListTile(
-                          title: Text(data.results![index].title ?? "",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  color: context.media.platformBrightness ==
-                                          Brightness.dark
-                                      ? Colors.grey
-                                      : Colors.black)),
-                          subtitle: ListTile(
-                            title: Text(
-                              data.results![index].overview!,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  color: context.media.platformBrightness ==
-                                          Brightness.dark
-                                      ? Colors.grey
-                                      : Colors.black),
-                            ),
-                            subtitle: Text(
-                              "Yayınlanma Tarihi: $releaseDate",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 15,
-                                  color: context.media.platformBrightness ==
-                                          Brightness.dark
-                                      ? Colors.grey
-                                      : Colors.black),
-                            ),
-                          )),
-                    ),
-                  ])),
+                Flexible(
+                  child: CachedNetworkImage(
+                    imageUrl: posterPath,
+                    placeholder: (context, url) =>
+                        new CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => new Icon(Icons.error),
+                  ),
+                ),
+                Container(
+                  child: ListTile(
+                      title: Text(data.results![index].title ?? "",
+                          textAlign: TextAlign.center,
+                          style: context.textTheme.headline5),
+                      subtitle: ListTile(
+                        title: Text(data.results![index].overview ?? "",
+                            overflow: TextOverflow.ellipsis,
+                            style: context.textTheme.headline6),
+                        subtitle: Text(
+                          "Yayınlanma Tarihi: $releaseDate",
+                          textAlign: TextAlign.center,
+                          style: context.textTheme.subtitle2,
+                        ),
+                      )),
+                ),
+              ])),
         ));
   }
 }

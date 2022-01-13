@@ -4,8 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:intl/intl.dart';
+import 'package:movinfo/core/base/base_state.dart';
 import 'package:movinfo/core/constants/navigation_constants.dart';
 import 'package:movinfo/core/extensions/context_entensions.dart';
+import 'package:movinfo/core/init/cache/locale_manager.dart';
 import 'package:movinfo/core/init/navigation/navigate_service.dart';
 import 'package:movinfo/core/init/network/network_manager.dart';
 import 'package:movinfo/core/view/search/model/keyword_model.dart' as keywords;
@@ -18,7 +20,7 @@ class TVSearchView extends StatefulWidget {
   _TVSearchViewState createState() => _TVSearchViewState();
 }
 
-class _TVSearchViewState extends State<TVSearchView> {
+class _TVSearchViewState extends BaseState<TVSearchView> {
   late TextEditingController controller;
   late ScrollController scrollController;
   int pageCount = 1;
@@ -51,10 +53,12 @@ class _TVSearchViewState extends State<TVSearchView> {
   }
 
   fetchData() async {
-    TVModel response = await NetworkManager.instance.getData<TVModel>(
-        '/search/tv',
-        TVModel(),
-        {'query': suggestion, 'page': pageCount, 'language': 'tr-TR'});
+    TVModel response = await NetworkManager.instance
+        .getData<TVModel>('/search/tv', TVModel(), {
+      'query': suggestion,
+      'page': pageCount,
+      'language': getLangKey(LocaleManager.getString('language')!)
+    });
     print(response.results!.isEmpty.toString());
     if (response.results == null) return;
     itemCount = response.results!.length;

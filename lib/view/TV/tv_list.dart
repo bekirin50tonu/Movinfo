@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:movinfo/core/base/base_state.dart';
 import 'package:movinfo/core/constants/app_constants.dart';
 import 'package:movinfo/core/constants/navigation_constants.dart';
 import 'package:movinfo/core/extensions/context_entensions.dart';
+import 'package:movinfo/core/init/cache/locale_manager.dart';
 import 'package:movinfo/core/init/navigation/navigate_service.dart';
 import 'package:movinfo/core/init/network/network_manager.dart';
 import 'package:movinfo/core/view/movie/model/movie_model.dart';
@@ -19,7 +21,7 @@ class TVList extends StatefulWidget {
   _TVListState createState() => _TVListState();
 }
 
-class _TVListState extends State<TVList> {
+class _TVListState extends BaseState<TVList> {
   StreamController<List<TVModel>> movieController = StreamController();
   List<TVModel> _items = [];
   int _itemCount = 0;
@@ -35,7 +37,7 @@ class _TVListState extends State<TVList> {
 
   @override
   void initState() {
-    scrollController = AppConstants.scrollController = ScrollController();
+    scrollController = ScrollController();
     super.initState();
     fetchData();
     var previousVariable = -1;
@@ -79,10 +81,12 @@ class _TVListState extends State<TVList> {
   }
 
   void fetchData() async {
-    TVModel items = await NetworkManager.instance.getData<TVModel>(
-        widget.path,
-        TVModel(),
-        {'language': 'tr-TR', 'page': this.currentPage, 'region': ',TR'});
+    TVModel items =
+        await NetworkManager.instance.getData<TVModel>(widget.path, TVModel(), {
+      'language': getLangKey(LocaleManager.getString('language')!),
+      'page': this.currentPage,
+      'region': getCountryKey(LocaleManager.getString('country')!)
+    });
     print(widget.path);
     if (items == null || items.results == null) return;
     _itemCount += items.results!.length;
@@ -168,8 +172,8 @@ class _TVListState extends State<TVList> {
     final String posterPath = data.results![index].posterPath != null
         ? baseUrl + data.results![index].posterPath!
         : "https://img.utdstc.com/screen/780/8d3/7808d37d64f066960c7570274395f59d9ab4fcbb1f8512878fa5c53346f05e71:200";
-
-    final releaseDate = data.results![index].firstAirDate != ""
+    final releaseDate = data.results![index].firstAirDate != "" ||
+            data.results![index].firstAirDate != null
         ? '${DateFormat("dd/MM/yyyy").format(DateTime.parse(data.results![index].firstAirDate!))}'
         : "";
 
@@ -180,53 +184,33 @@ class _TVListState extends State<TVList> {
           SizedBox(
             height: context.dynamicHeight(0.7),
             child: Card(
-                color: context.media.platformBrightness == Brightness.dark
-                    ? Colors.black87
-                    : Colors.grey.shade300,
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Flexible(
-                        child: CachedNetworkImage(
-                          imageUrl: posterPath,
-                          placeholder: (context, url) =>
-                              new CircularProgressIndicator(),
-                          errorWidget: (context, url, error) =>
-                              new Icon(Icons.error),
-                        ),
-                      ),
-                      Container(
-                        child: ListTile(
-                            title: Text(data.results![index].name!,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    color: context.media.platformBrightness ==
-                                            Brightness.dark
-                                        ? Colors.grey
-                                        : Colors.black)),
-                            subtitle: ListTile(
-                              title: Text(data.results![index].overview!,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      color: context.media.platformBrightness ==
-                                              Brightness.dark
-                                          ? Colors.grey
-                                          : Colors.black)),
-                              subtitle: Text(
-                                releaseDate,
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    color: context.media.platformBrightness ==
-                                            Brightness.dark
-                                        ? Colors.grey
-                                        : Colors.black),
-                              ),
-                            )),
-                      ),
-                    ])),
+                  Flexible(
+                    child: CachedNetworkImage(
+                      imageUrl: posterPath,
+                      placeholder: (context, url) =>
+                          new CircularProgressIndicator(),
+                      errorWidget: (context, url, error) =>
+                          new Icon(Icons.error),
+                    ),
+                  ),
+                  Container(
+                    child: ListTile(
+                        title: Text(data.results![index].name ?? "",
+                            textAlign: TextAlign.center,
+                            style: context.textTheme.headline5),
+                        subtitle: ListTile(
+                          title: Text(data.results![index].overview ?? "",
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.headline6),
+                          subtitle: Text(releaseDate,
+                              style: context.textTheme.subtitle2),
+                        )),
+                  ),
+                ])),
           )
         ]));
   }

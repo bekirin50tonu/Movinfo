@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:movinfo/core/init/state/theme_counter.dart';
+import 'package:movinfo/core/state/theme_state.dart';
+import 'package:provider/provider.dart';
 
 extension ContextExtension on BuildContext {
   //PADDING VALUES
@@ -23,6 +26,23 @@ extension ContextExtension on BuildContext {
       horizontal: dynamicWidth(highPaddingValue));
 
   ThemeData get theme => Theme.of(this);
+
+  Counter get themeCounter => Counter();
+
+  TextTheme get textTheme => Theme.of(this).textTheme;
+
+  ThemeData get lightTheme => ThemeData(
+        brightness: Brightness.light,
+        primaryColor: Colors.deepPurple.shade800,
+        accentColor: Colors.purpleAccent.shade700,
+        textTheme: TextTheme(bodyText2: TextStyle(color: Colors.black54)),
+      );
+  ThemeData get darkTheme => ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: Colors.black87,
+        accentColor: Colors.black54,
+        textTheme: TextTheme(bodyText2: TextStyle(color: Colors.white70)),
+      );
 
   MediaQueryData get media => MediaQuery.of(this);
 

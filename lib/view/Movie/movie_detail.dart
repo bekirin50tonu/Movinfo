@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:movinfo/core/base/base_state.dart';
 import 'package:movinfo/core/extensions/context_entensions.dart';
+import 'package:movinfo/core/init/cache/locale_manager.dart';
 import 'package:movinfo/core/init/network/network_manager.dart';
 import 'package:movinfo/core/view/movie/model/movie_detail_model.dart';
 import 'package:movinfo/core/view/movie/model/movie_model.dart';
@@ -15,7 +17,7 @@ class MovieDetailView extends StatefulWidget {
   _MovieDetailViewState createState() => _MovieDetailViewState();
 }
 
-class _MovieDetailViewState extends State<MovieDetailView> {
+class _MovieDetailViewState extends BaseState<MovieDetailView> {
   late Results model;
   StreamController<MovieDetailModel> _streamController = StreamController();
   @override
@@ -27,8 +29,8 @@ class _MovieDetailViewState extends State<MovieDetailView> {
 
   void fetchData() async {
     MovieDetailModel items = await NetworkManager.instance
-        .getData<MovieDetailModel>(
-            '/movie/${model.id}', MovieDetailModel(), {'language': 'tr-TR'});
+        .getData<MovieDetailModel>('/movie/${model.id}', MovieDetailModel(),
+            {'language': getLangKey(LocaleManager.getString('language')!)});
     // ignore: unnecessary_null_comparison
     if (items == null) return;
     _streamController.add(items);
@@ -80,8 +82,6 @@ class _MovieDetailViewState extends State<MovieDetailView> {
                     child: Padding(
                       padding: context.lowHorizontalPadding,
                       child: Container(
-                        decoration: BoxDecoration(
-                            color: Color.fromRGBO(197, 197, 197, 0.5)),
                         child: Column(
                           children: [
                             Padding(
@@ -90,14 +90,19 @@ class _MovieDetailViewState extends State<MovieDetailView> {
                                   imageUrl: baseUrl + data.posterPath!),
                             ),
                             ListTile(
-                                title: Text(
-                              data.originalTitle!,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 30),
-                            )),
+                              title: Text(data.originalTitle!,
+                                  textAlign: TextAlign.center,
+                                  style: context.textTheme.headline5),
+                            ),
                             ListTile(
-                                title: Text('Açıklama'),
-                                subtitle: Text(data.overview!)),
+                                title: Text(
+                                  'Açıklama',
+                                  style: context.textTheme.subtitle1,
+                                ),
+                                subtitle: Text(
+                                  data.overview!,
+                                  style: context.textTheme.subtitle1,
+                                )),
                             ListTile(
                               title: Text('Diller'),
                               subtitle: ListView.builder(
